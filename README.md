@@ -8,12 +8,12 @@
 
 This repository tracks all available community KDF (key derivation function) plugins for the Flipper Zero.
 
-Plugin list: https://github.com/noproto/flipper_kdf/wiki/List
+Plugin list: https://github.com/zproale/flipper_kdf/wiki/List
 
 ## How
 
 1. Install latest official firmware
-2. Download a [release build](https://github.com/noproto/flipper_kdf/releases/latest) containing a ZIP of all of the NFC app plugins
+2. Download a [release build](https://github.com/zproale/my_flipper_kdf/releases/latest) containing a ZIP of all of the NFC app plugins
 3. Use qFlipper or the mobile app to extract the plugins to your SD card (ext) at /apps_data/nfc/plugins/
 4. Scan your card as you normally would using the NFC app (NFC -> Read)
 
