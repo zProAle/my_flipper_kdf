@@ -43,4 +43,4 @@ jobs:
         files: |
           ${{ github.workspace }}/flipperzero-firmware/dist/f7-D/apps_data/nfc/plugins/plugins.zip
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
