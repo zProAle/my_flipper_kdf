@@ -21,7 +21,7 @@ Tracking official KDF plugin support: https://github.com/flipperdevices/flipperz
 
 ## Builds
 
-Available at https://github.com/noproto/flipper_kdf/releases/latest
+Available at https://github.com/zproale/flipper_kdf/releases/latest
 
 ## Disclaimer
 
