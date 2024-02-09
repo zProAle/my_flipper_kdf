@@ -35,52 +35,55 @@ static MfClassicKeyPair microel_1k_keys[] = {
 
 const uint8_t verify_sector = 1;
 
-void calculateSumHex(const uint8_t *uid, size_t uidSize, uint8_t sumHex[]) {
-  const uint8_t xorKey[] = { 0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9 };
-  int sum = 0;
+void calculateSumHex(const uint8_t* uid, size_t uidSize, uint8_t sumHex[]) {
+    const uint8_t xorKey[] = {0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9};
+    int sum = 0;
 
-  for (size_t i = 0; i < uidSize; i++) {
-    sum += uid[i];
-  }
+    for(size_t i = 0; i < uidSize; i++) {
+        sum += uid[i];
+    }
 
-  int sumTwoDigits = sum % 256;
+    int sumTwoDigits = sum % 256;
 
-  if (sumTwoDigits % 2 == 1) {
-    sumTwoDigits += 2;
-  }
+    if(sumTwoDigits % 2 == 1) {
+        sumTwoDigits += 2;
+    }
 
-  for (size_t i = 0; i < sizeof(xorKey); i++) {
-    sumHex[i] = sumTwoDigits ^ xorKey[i];
-  }
+    for(size_t i = 0; i < sizeof(xorKey); i++) {
+        sumHex[i] = sumTwoDigits ^ xorKey[i];
+    }
 }
 
-void generateKeyA(const uint8_t *uid, uint8_t uidSize, uint8_t keyA[]) {
-  uint8_t sumHex[6];
-  calculateSumHex(uid, uidSize, sumHex);
-  uint8_t firstCharacter = (sumHex[0] >> 4) & 0xF;
+void generateKeyA(const uint8_t* uid, uint8_t uidSize, uint8_t keyA[]) {
+    uint8_t sumHex[6];
+    calculateSumHex(uid, uidSize, sumHex);
+    uint8_t firstCharacter = (sumHex[0] >> 4) & 0xF;
 
-  if (firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA || firstCharacter == 0xB) {
-    // XOR WITH 0x40
-    for (size_t i = 0; i < sizeof(sumHex); i++) {
-      keyA[i] = 0x40 ^ sumHex[i];
+    if(firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA ||
+       firstCharacter == 0xB) {
+        // XOR WITH 0x40
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = 0x40 ^ sumHex[i];
+        }
+    } else if(
+        firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE ||
+        firstCharacter == 0xF) {
+        // XOR WITH 0xC0
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = 0xC0 ^ sumHex[i];
+        }
+    } else {
+        //Key a is the same as sumHex
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = sumHex[i];
+        }
     }
-  } else if (firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE || firstCharacter == 0xF) {
-    // XOR WITH 0xC0
-    for (size_t i = 0; i < sizeof(sumHex); i++) {
-      keyA[i] = 0xC0 ^ sumHex[i];
-    }
-  } else {
-    //Key a is the same as sumHex
-    for (size_t i = 0; i < sizeof(sumHex); i++) {
-      keyA[i] = sumHex[i];
-    }
-  }
 }
 
 void generateKeyB(uint8_t keyA[], size_t keyASize, uint8_t keyB[]) {
-  for (size_t i = 0; i < keyASize; i++) {
-    keyB[i] = 0xFF ^ keyA[i];
-  }
+    for(size_t i = 0; i < keyASize; i++) {
+        keyB[i] = 0xFF ^ keyA[i];
+    }
 }
 
 static bool microel_read(Nfc* nfc, NfcDevice* device) {
@@ -116,9 +119,10 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
         nfc_util_num2bytes(nfc_util_bytes2num(keyA, KEY_LENGTH), COUNT_OF(key.data), key.data);
         const uint8_t block_num = mf_classic_get_first_block_num_of_sector(0); // This is 0
         MfClassicAuthContext auth_context;
-        error = mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_context);
+        error =
+            mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_context);
         if(error != MfClassicErrorNone) {
-          break;
+            break;
         }
 
         // Save keys generated to stucture
@@ -158,7 +162,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     furi_assert(parsed_data);
 
-     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
     bool parsed = false;
 
@@ -173,10 +177,11 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
         generateKeyA(uid, UID_LENGTH, keyA);
 
         // Verify key
-        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+        MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
         uint64_t key_for_check_from_array = nfc_util_bytes2num(keyA, KEY_LENGTH);
-        if(key != key_for_check_from_array) return false;
+        if(key != key_for_check_from_array) break;
 
         //Get credit in block number 8
         const uint8_t* temp_ptr = data->block[4].data;
@@ -187,9 +192,14 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
         for(size_t i = 0; i < UID_LENGTH; i++) {
             furi_string_cat_printf(parsed_data, " %02X", uid[i]);
         }
-        furi_string_cat_printf(parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
-        furi_string_cat_printf(parsed_data, "Previus Credit: %d.%02d E \n", previus_balance / 100, previus_balance % 100);
-        
+        furi_string_cat_printf(
+            parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
+        furi_string_cat_printf(
+            parsed_data,
+            "Previus Credit: %d.%02d E \n",
+            previus_balance / 100,
+            previus_balance % 100);
+
         parsed = true;
     } while(false);
 
@@ -199,7 +209,8 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin microel_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify = NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0 but added verify in read function
+    .verify =
+        NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0 but added verify in read function
     .read = microel_read,
     .parse = microel_parse,
 };
