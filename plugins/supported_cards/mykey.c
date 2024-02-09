@@ -127,6 +127,11 @@ static bool mykey_parse(const NfcDevice *device, FuriString *parsed_data)
             break;
         }
 
+        //Check lock id status set to active
+        static bool mykey_has_lockid(const St25tbData* data) {
+            return (data->blocks[5] & 0xFF) == 0x7F;
+        }
+
         // Calc data
         uint32_t _uid = get_uid(data->uid);
         uint32_t _count_down_counter_new = new_get_count_down_counter(__bswap32(data->blocks[6]));
@@ -144,6 +149,7 @@ static bool mykey_parse(const NfcDevice *device, FuriString *parsed_data)
         furi_string_cat_printf(parsed_data, "Current Credit: %d.%02d E \n", credit / 100, credit % 100);
         furi_string_cat_printf(parsed_data, "Previus Credit: %d.%02d E \n", _previous_credit / 100, _previous_credit % 100);
         furi_string_cat_printf(parsed_data, "Is Bound: %s\n", _is_bound ? "yes" : "no");
+        furi_string_cat_printf(parsed_data, "Lock ID: %s\n", mykey_has_lockid(data) ? "maybe" : "none");
 
         parsed = true;
     } while (false);
