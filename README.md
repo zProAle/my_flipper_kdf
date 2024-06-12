@@ -2,13 +2,13 @@
 
 ![](https://thumb.tildacdn.com/tild3332-3839-4061-b663-363464303432/-/resize/214x/-/format/webp/noroot.png)
 
-[![Build and Release on Tag](https://github.com/noproto/flipper_kdf/actions/workflows/dist.yml/badge.svg)](https://github.com/noproto/flipper_kdf/actions/workflows/dist.yml)
+[![Build and Release on Tag](https://github.com/zproale/my_flipper_kdf/actions/workflows/main_action.yml/badge.svg)](https://github.com/zproale/my_flipper_kdf/actions/workflows/dist.yml)
 
 ## What
 
 This repository tracks all available community KDF (key derivation function) plugins for the Flipper Zero.
 
-Plugin list: https://github.com/zproale/flipper_kdf/wiki/List
+Plugin list: https://github.com/zproale/my_flipper_kdf/wiki/List
 
 ## How
 
@@ -21,7 +21,7 @@ Tracking official KDF plugin support: https://github.com/flipperdevices/flipperz
 
 ## Builds
 
-Available at https://github.com/zproale/flipper_kdf/releases/latest
+Available at https://github.com/zproale/my_flipper_kdf/releases/latest
 
 ## Disclaimer
 
